@@ -12,6 +12,11 @@ public interface BaiVietDAO extends DAO<BaiViet>{
     int soBaiViet();
 
     int soBaiViet(KhachHang khachHang) ;
+    int soBaiVietDaXoa(KhachHang khachHang) ;
 
     List<BaiViet> findAllByUser(KhachHang khachHang , int index);
+
+    List<BaiViet> xemDanhSachBaiVietDaXoa(KhachHang khachHang,int index) ;
+
+    boolean deleteBaiVietForNQT(BaiViet baiViet) ;
 }

@@ -7,6 +7,7 @@ import dataAccess.IntefaceDAO.BaiVietYeuThichDAO;
 import object.*;
 import service.Itf.BaiVietService;
 import service.Itf.BaiVietYeuThichService;
+import service.Itf.BaoCaoService;
 import service.Itf.BinhLuanService;
 
 import java.util.List;
@@ -105,12 +106,12 @@ public class BaiVietServiceImpl implements BaiVietService {
                 System.out.println("---Bài viết số " + ++thuTuBaiViet );
                 hienThiThongTin(x);
             }
-            System.out.printf("1.Thích\n2.Bình luận bài viết\n3.Hiển thị toàn bộ bình luận\n4.Hiển thị danh sách người thích bài viết \n0.Hiển thị thêm hoặc thoát: ");
+            System.out.printf("1.Thích\n2.Bình luận bài viết\n3.Hiển thị toàn bộ bình luận\n4.Hiển thị danh sách người thích bài viết \n5.Truy cập vào trang cá nhân\n6.Báo cáo bài viết\n0.Hiển thị thêm hoặc thoát: ");
             choose = Ip.nextInt();
             if (choose == 1) { // Yêu thích bài viết
                 if (khachHang == null) {
-                    System.out.println("Vui lòng đăng nhập để có thể yêu thích bài viết");
-                    return;
+                    System.out.println("-------------------------------Vui lòng đăng nhập để có thể yêu thích bài viết-------------------------------");
+                    continue;
                 }
                 System.out.println("Lựa chọn bài viết");
                 for (BaiViet x : baiVietList) {
@@ -124,8 +125,8 @@ public class BaiVietServiceImpl implements BaiVietService {
             }
             if (choose == 2) { // Bình luận bài viết
                 if (khachHang == null) {
-                    System.out.println("Vui lòng đăng nhập để có thể bình luận bài viết");
-                    return;
+                    System.out.println("-------------------------------Vui lòng đăng nhập để có thể bình luận bài viết-------------------------------");
+                    continue;
                 }
                 System.out.println("Lựa chọn bài viết");
                 for (BaiViet x : baiVietList) {
@@ -164,6 +165,49 @@ public class BaiVietServiceImpl implements BaiVietService {
                     xemDanhSachNguoiThich(baiVietList.get(viTriBaiViet-1));
                 }
             }
+            if(choose == 5){ // Truy cập trang cá nhân người đăng
+                System.out.printf("Lựa chọn người dùng(1-" + baiVietList.size()+ ")");
+                int index = 0 ;
+                for(BaiViet baiViet : baiVietList){
+                    System.out.println("       Khách hàng số: " + ++index);
+                    System.out.println( "           " + baiViet.getTenDangNhap().getTenKhachHang());
+                }
+                System.out.printf("Mời bạn nhập lựa chọn , nhập 0 để thoát:  ");
+                int viTriKhachHang = Ip.nextInt();
+                if(viTriKhachHang < 1) break;
+                int blogIndex = 1 ;
+                int maxPage = (int) soTrang(baiVietList.get(viTriKhachHang-1).getTenDangNhap()).getNoiDung();
+                do {
+                    Response responseBlog = layRaDanhSachBaiVietTheoNguoiDung(baiVietList.get(viTriKhachHang-1).getTenDangNhap(), blogIndex);
+                    System.out.println("--------------------------Bạn đang ở trang cá nhân của [ " +baiVietList.get(viTriKhachHang-1).getTenDangNhap().getTenKhachHang()  + " ]-----------------------");
+                    List<BaiViet> baiViets = (List<BaiViet>) responseBlog.getNoiDung();
+                    xuLiBaiViet(baiViets,khachHang);
+                    blogIndex = (int) xuLiTrang(maxPage).getNoiDung();
+                    if(blogIndex < 1)
+                    {
+                        break ;
+                    }
+                }while (true) ;
+            }
+
+            if(choose == 6){ // Báo cáo bài viết
+                if (khachHang == null) {
+                    System.out.println("-------------------------------Vui lòng đăng nhập để có thể báo cáo bài viết-------------------------------");
+                    continue;
+                }
+                System.out.println("Lựa chọn bài viết bạn thấy vi phạm tiêu chuẩn cộng đồng");
+                for (BaiViet x : baiVietList) {
+                    System.out.println("    -" + x.getTenBaiViet());
+                }
+                System.out.printf("Nhập bài viết cần báo cáo(1-" + baiVietList.size() + ",nhập 0 để thoát): ");
+                int viTriBaiViet = Ip.nextInt();
+                if(viTriBaiViet < 1){
+                    continue;
+                }
+                BaoCaoService baoCaoService = new BaoCaoServiceImpl() ;
+                baoCaoService.themBaoCao(baiVietList.get(viTriBaiViet-1), khachHang) ;
+            }
+
             if (choose == 0) return;
         }while(true) ;
     }
@@ -210,7 +254,7 @@ public class BaiVietServiceImpl implements BaiVietService {
         BaiVietYeuThichService baiVietYeuThichService = new BaiVietYeuThichServiceImpl();
         Response response = baiVietYeuThichService.kiemTraTrangThai(baiViet, khachHang);
         if (response.getMaLoi().equals("200")) {
-            System.out.printf("Bài viết đã được yêu thích tử trước \n1.Để huỷ yêu thích bài viết này\n0.Thoát: ");
+            System.out.printf("Bài viết đã được yêu thích từ trước \n1.Để huỷ yêu thích bài viết này\n0.Thoát: ");
             int p = Ip.nextInt();
             if (p == 0) {
                 System.out.println();
@@ -233,6 +277,7 @@ public class BaiVietServiceImpl implements BaiVietService {
             System.out.print(text[i] + " ");
         }
         System.out.println();
+        System.out.println("Người đăng: " + baiViet.getTenDangNhap().getTenKhachHang());
         System.out.println("Ngày đăng: " + baiViet.getNgayDang());
         BinhLuanService binhLuanService = new BinhLuanServiceImpl()  ;
         Response response1 = binhLuanService.hienThiSoLuongBinhLuan(baiViet) ;
@@ -271,6 +316,24 @@ public class BaiVietServiceImpl implements BaiVietService {
     }
 
     @Override
+    public Response xoaBaiVietForNQT(BaiViet baiViet) {
+        boolean check = baiVietDAO.deleteBaiVietForNQT(baiViet) ;
+        Response response = Response.builder()
+                .maLoi("404")
+                .noiDung("Bài viết chưa được xoá")
+                .trangThai("Thất bại")
+                .build();
+        if(check) {
+            response = Response.builder()
+                    .maLoi("200")
+                    .noiDung("Xoá thành công")
+                    .trangThai("Thành công")
+                    .build() ;
+        }
+        return response ;
+    }
+
+    @Override
     public Response layRaDanhSachBaiVietTheoNguoiDung(KhachHang khachHang , int index) { // trả về danh sách bài viết của người dùng
         List<BaiViet>baiViets = baiVietDAO.findAllByUser(khachHang , index) ;
         Response response = Response.builder()
@@ -288,6 +351,38 @@ public class BaiVietServiceImpl implements BaiVietService {
                 .maLoi("200")
                 .noiDung(pageSize)
                 .trangThai("Thành công")
+                .build() ;
+        return response ;
+    }
+
+
+    @Override
+    public Response soTrangDaXoa(KhachHang khachHang) {
+        int pageSize = baiVietDAO.soBaiVietDaXoa(khachHang);
+        Response response = Response.builder()
+                .maLoi("200")
+                .noiDung(pageSize)
+                .trangThai("Thành công")
+                .build() ;
+        return response ;
+    }
+
+    @Override
+    public Response xemBaiVietDaXoa(KhachHang khachHang , int index) {
+        List<BaiViet> baiViets = baiVietDAO.xemDanhSachBaiVietDaXoa(khachHang , index) ;
+        Response response = Response.builder()
+                .noiDung(baiViets)
+                .build();
+        return response ;
+    }
+
+    @Override
+    public Response khoiPhucBaiVietDaXoa(BaiViet baiViet) {
+        baiViet.setTonTai(true);
+        baiVietDAO.update(baiViet) ;
+        Response response = Response.builder()
+                .maLoi("200")
+                .noiDung(baiViet)
                 .build() ;
         return response ;
     }

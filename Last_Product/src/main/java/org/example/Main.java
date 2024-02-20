@@ -33,14 +33,16 @@ public class Main {
     static void tinhNang(KhachHang khachHang) throws  Exception{
         int choose;
         do {
-            System.out.print("----------------------------------Menu--------------------------\n1.Trang chủ\n2.Tìm kiếm bài viết\n3.Quản lí bài viết\n4.Lịch sử hoạt động\n5.Tài khoản\n6.Sử dụng với tư cách người quản trị\n0.Dừng chương trình: ");
+            System.out.print("----------------------------------Menu--------------------------\n1.Trang chủ\n2.Tìm kiếm bài viết\n3.Tìm kiếm khách hàng\n4.Quản lí bài viết\n5.Lịch sử hoạt động\n6.Tài khoản\n7.Sử dụng với tư cách người quản trị\n0.Dừng chương trình: ");
             choose = Ip.nextInt();
             if (choose == 1) trangChu(khachHang);
             if (choose == 2) timKiemBaiViet(khachHang);
-            if (choose == 3) khachHang = quanLiBaiViet(khachHang);
-            if (choose == 4) khachHang = lichSuHoatDong(khachHang);
-            if (choose == 5) khachHang = taiKhoan(khachHang);
-            if (choose == 6) khachHang = nguoiQuanTri(khachHang) ;
+            if (choose == 3) khachHang = timKiemKhachHang(khachHang) ;
+            if (choose == 4) khachHang = quanLiBaiViet(khachHang);
+            if (choose == 5) khachHang = lichSuHoatDong(khachHang);
+            if (choose == 6) khachHang = taiKhoan(khachHang);
+            if (choose == 7) khachHang = nguoiQuanTri(khachHang) ;
+
         } while (choose > 0);
     }
     static void trangChu(KhachHang khachHang){
@@ -57,6 +59,7 @@ public class Main {
 
     static KhachHang quanLiBaiViet(KhachHang khachHang){
         if(khachHang ==null){
+            Ip.nextLine()  ;
             System.out.println("Vui lòng đăng nhập");
             khachHang = khachHangController.dangNhap() ;
             if(khachHang == null) return null ;
@@ -64,12 +67,13 @@ public class Main {
         int choose ;
         do{
             System.out.println("----------------------------------Quản lí bài viết--------------------------");
-            System.out.printf("1.Thêm bài viết \n2.Xoá bài viết\n3.Sửa bài viết\n4.Xem danh sách bài viết\n0.Thoát: ");
+            System.out.printf("1.Thêm bài viết \n2.Xoá bài viết\n3.Xem bài viết đã xoá\n4.Sửa bài viết\n5.Xem danh sách bài viết\n0.Thoát: ");
             choose=Ip.nextInt() ;
             if(choose == 1) baiVietController.themBaiViet(khachHang);
             if(choose == 2) baiVietController.xoaBaiViet(khachHang);
-            if(choose == 3) baiVietController.suaBaiViet(khachHang);
-            if(choose == 4) baiVietController.xemDanhSachBaiViet(khachHang);
+            if(choose == 3) baiVietController.xemBaiVietDaXoa(khachHang) ;
+            if(choose == 4) baiVietController.suaBaiViet(khachHang);
+            if(choose == 5) baiVietController.xemDanhSachBaiViet(khachHang);
             if(choose == 0) return khachHang ;
         }while(true) ;
     }
@@ -98,9 +102,9 @@ public class Main {
             khachHang = ans ;
             System.out.println("-----------------------------------Tài khoản--------------------------");
             if(khachHang == null)
-                System.out.printf("1.Đăng nhập\n2.Đăng kí\n3.Hiển thị thông tin tài khoản\n4.Cập nhập tài khoản\n5.Xoá tài khoản\n0.Thoát: ");
+                System.out.printf("1.Đăng nhập\n2.Đăng kí\n3.Hiển thị thông tin tài khoản\n4.Cập nhập tài khoản\n5.Xoá tài khoản\n6.Xem người theo dõi\n0.Thoát: ");
             else{
-                System.out.printf("1.Đăng xuất\n2.Đăng kí\n3.Hiển thị thông tin tài khoản\n4.Cập nhập tài khoản\n5.Xoá tài khoản\n0.Thoát: ");
+                System.out.printf("1.Đăng xuất\n2.Đăng kí\n3.Hiển thị thông tin tài khoản\n4.Cập nhập tài khoản\n5.Xoá tài khoản\n6.Xem người theo dõi\n0.Thoát: ");
             }
             choose = Ip.nextInt() ;
             Ip.nextLine() ;
@@ -116,6 +120,7 @@ public class Main {
             if(choose == 3) khachHangController.thongTinTaiKhoan(khachHang);
             if(choose == 4) ans = khachHangController.suaTaiKhoan(khachHang) ;
             if(choose == 5) ans = khachHangController.xoaTaiKhoan(khachHang) ;
+            if(choose == 6) ans = khachHangController.hienThiSoNguoiTheoDoi(khachHang) ;
             if(choose == 0) {
                 return ans ;
             }
@@ -138,15 +143,23 @@ public class Main {
             System.out.printf("1.Đăng kí tài khoản quản trị\n" +
                     "2.Thống kê hệ thống\n" +
                     "3.Xoá bài viết\n" +
+                    "4.Thống kê bài viết bị báo cáo là vi phạm\n" +
                     "0.Thoát: ");
             int choose = Ip.nextInt();
             if (choose == 1) nguoiQuanTriController.dangKiTaiKhoanQuanTri(khachHang);
             if (choose == 2) khachHang = nguoiQuanTriController.thongKeHeThong(khachHang) ;
             if (choose == 3) khachHang = nguoiQuanTriController.xoaBaiVietNQT(khachHang) ;
+            if (choose == 4) khachHang = nguoiQuanTriController.hienThiBaoCaoBaiVietViPhamTieuChuan(khachHang) ;
             if (choose == 0) return khachHang;
         }while (true) ;
     }
-
+    public  static  KhachHang timKiemKhachHang(KhachHang khachHang){
+        System.out.print("Nhập tên khách hàng bạn cần tìm kiếm: ");
+        Ip.nextLine() ;
+        String tenKhachHang = Ip.nextLine().trim();
+        khachHangController.timKiemKhachHang(khachHang, tenKhachHang);
+        return khachHang ;
+    }
     public static void main(String[] args) throws Exception {
         KhachHang khachHang = null ;
         tinhNang(khachHang);

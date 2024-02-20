@@ -1,5 +1,7 @@
 package controller;
 
+import dataAccess.ImplementDAO.BaiVietImpl;
+import dataAccess.IntefaceDAO.BaiVietDAO;
 import object.*;
 import service.Impl.BaiVietServiceImpl;
 import service.Impl.BaiVietYeuThichServiceImpl;
@@ -18,7 +20,7 @@ public class KhachHangController {
     private final Scanner Ip = new Scanner(System.in) ;
     private KhachHangService khachHangService = new KhachHangServiceImpl() ;
     // Dang ki tai khoan
-    public void dangKiTaiKhoan(){
+    public void dangKiTaiKhoan(){ // Đăng kí tài khoản
         KhachHang khachHang = new KhachHang();
         khachHang.dangKiTaiKhoan();
         Response response = khachHangService.dangKiTaiKhoan(khachHang) ;
@@ -29,7 +31,7 @@ public class KhachHangController {
             System.out.println("Đăng kí tài khoản thành công");
         }
     }
-    public KhachHang dangNhap(){
+    public KhachHang dangNhap(){ // Đăng nhập tài khoản
         System.out.println("Bỏ trống để sử dụng mà không cần tài khoản");
         System.out.printf("Nhập tên đăng nhập: ");
         String tenDangNhap = Ip.nextLine().trim() ;
@@ -50,11 +52,11 @@ public class KhachHangController {
         return  null ;
     }
 
-    public KhachHang dangXuat(KhachHang khachHang){
+    public KhachHang dangXuat(KhachHang khachHang){ // Đăng xuất tài khoản
         return  null ;
     }
 
-    public KhachHang suaTaiKhoan(KhachHang khachHang){
+    public KhachHang suaTaiKhoan(KhachHang khachHang){ // Sửa thong tin tài khoản
         if(khachHang == null){
             System.out.println("Vui lòng đăng nhập");
             return null ;
@@ -96,7 +98,7 @@ public class KhachHangController {
         }
         return khachHang ;
     }
-    public void thongTinTaiKhoan(KhachHang khachHang){
+    public void thongTinTaiKhoan(KhachHang khachHang){ // Xem thông tin tài khoản
         if(khachHang == null){
             System.out.println("Vui lòng đăng nhập");
             return ;
@@ -110,7 +112,37 @@ public class KhachHangController {
         }
     }
 
-    public KhachHang xoaTaiKhoan(KhachHang khachHang){
+    public KhachHang hienThiSoNguoiTheoDoi(KhachHang khachHang){
+        if(khachHang == null){
+            System.out.println("Vui lòng đăng nhập");
+            return null;
+        }
+        Response response = khachHangService.xemNguoiTheoDoi(khachHang) ;
+        List<TheoDoi> theoDois = (List<TheoDoi>) response.getNoiDung();
+        int pageIndex = 1 ;
+        do{
+            System.out.println("---------------Tổng số người theo dõi: " + theoDois.size() );
+            System.out.println("----------------Danh sách người theo dõi---------------------");
+            for(int i  = (pageIndex - 1) * 5 ; i < Math.min((pageIndex) * 5 , theoDois.size())  ; i++)  {
+                System.out.println("Tên người dùng: " + theoDois.get(i).getTenNguoiTheoDoi().getTenKhachHang());
+            }
+            System.out.print("1.Hiển thị thêm\n0.Thoát khỏi xem danh sách người theo dõi: " );
+            int choose = Ip.nextInt();
+            if(choose == 0){
+                break;
+            }
+            if(choose == 1){
+                System.out.print("Nhập trang bạn muốn 1-" + ((theoDois.size() + 4) /5) + "), nhập 0 để thoát: ");
+                pageIndex = Ip.nextInt();
+                if(pageIndex == 0){
+                    break;
+                }
+            }
+        }while (true) ;
+        return khachHang ;
+    }
+
+    public KhachHang xoaTaiKhoan(KhachHang khachHang){ // Xoá tài khoản từ phía khách hàng
         if(khachHang == null){
             System.out.println("Vui lòng đăng nhập");
             return null;
@@ -166,22 +198,24 @@ public class KhachHangController {
             Response response = binhLuanService.layRaDanhSachBinhLuan(khachHang,pageIndex) ;
             List<BinhLuan> binhLuans = (List<BinhLuan>) response.getNoiDung();
             System.out.println("---------------------------Lịch sử bình luận--------------------------------");
+            int p = 0 ;
             for(BinhLuan x:binhLuans){
+                System.out.println("Bình luận số: " + ++p);
                 binhLuanService.hienThiBinhLuan(x);
             }
-            System.out.printf("\n1.Xoá bình luận\n2.Sửa bình luận\n0.Hiển thị thêm hoặc thoát: ");
+            System.out.printf("\n1.Xoá bình luận\n2.Sửa bình luận\n3.Truy nhập bài viết\n0.Hiển thị thêm hoặc thoát: ");
             int choose = Ip.nextInt() ;
             if(choose == 0) {
                 pageIndex = (int) binhLuanService.xuLiTrang(maxPage).getNoiDung();
                 if (pageIndex == 0) return;
             }
-            if(choose == 2){
+            if(choose == 1){
                 System.out.printf("Lựa chọn bình luận cần xoá (1-" + binhLuans.size() + "): ");
                 int viTriBL = Ip.nextInt() ;
                 Response responseBinhLuan = binhLuanService.xoaBinhLuan(binhLuans.get(viTriBL-1)) ;
                 System.out.println(responseBinhLuan.getNoiDung());
             }
-            if(choose == 3){
+            if(choose == 2){
                 System.out.printf("Lựa chọn bình luận cần sửa (1-" + binhLuans.size() + "): ");
                 int viTriBL = Ip.nextInt() ;
                 Ip.nextLine() ;
@@ -200,9 +234,32 @@ public class KhachHangController {
                 else
                     System.out.println(responseSuaBinhLuan.getNoiDung());
             }
+            if(choose == 3){
+                BaiVietService baiVietService = new BaiVietServiceImpl() ;
+                System.out.printf("Lựa chọn bài viết cần xem(1-" + binhLuans.size() + "),0 để thoát: ");
+                int viTriBL = Ip.nextInt() ;
+                if(viTriBL < 1){
+                    continue;
+                }
+                Ip.nextLine() ;
+                BaiViet baiViet = binhLuans.get(viTriBL-1).getMaBaiViet()  ;
+                baiVietService.hienThiThongTin(baiViet);
+                System.out.printf("1.Hiển thị danh sách người yêu thích\n2.Hiển thị thêm bình luận\n0.Thoát: ");
+                int choose3 = Ip.nextInt();
+                if(choose3 == 2){
+                    baiVietService.xemToanBoBinhLuan(baiViet);
+                }
+                if(choose3 == 1){
+                    baiVietService.xemDanhSachNguoiThich(baiViet);
+                }
+                if(choose3 == 0){
+                    break;
+                }
+
+            }
         }while(true) ;
     }
-    public void lichSuYeuThich(KhachHang khachHang){
+    public void lichSuYeuThich(KhachHang khachHang){ // Xem lịch sử thích bài viết
         if(khachHang == null) {
             System.out.println("Bạn cần đăng nhập");
             return ;
@@ -223,11 +280,14 @@ public class KhachHangController {
             for(BaiVietYeuThich x : baiVietYeuThiches){
                 System.out.println("    - " + ++p + ". Tên bài viết: " + x.getMaBaiViet().getTenBaiViet());
             }
-            System.out.printf("1.Xoá lượt yêu thích\n0.Hiển thị thêm hoặc thoát: ");
+            System.out.printf("1.Xoá lượt yêu thích\n2.Truy nhập bài viết\n0.Hiển thị thêm hoặc thoát: ");
             int choose = Ip.nextInt() ;
             if(choose == 1){
-                System.out.print("Nhập vị trí bài viết bạn cần xoá(1-" + baiVietYeuThiches.size() + ",bỏ trống để huỷ): ");
+                System.out.print("Nhập vị trí bài viết bạn cần xoá(1-" + baiVietYeuThiches.size() + ",0 để thoát): ");
                 int viTriYeuThich = Ip.nextInt() ;
+                if(viTriYeuThich == 0){
+                    continue;
+                }
                 Response responseXoaYeuThich = baiVietYeuThichService.xoaYeuThich(baiVietYeuThiches.get(viTriYeuThich-1).getMaBaiViet(), khachHang) ;
                 System.out.println(responseXoaYeuThich.getNoiDung());
             }
@@ -235,6 +295,101 @@ public class KhachHangController {
                 pageIndex = (int) baiVietYeuThichService.xuLiTrang(pageSize).getNoiDung();
                 if(pageIndex < 1) return ;
             }
+            if(choose == 2) {
+                BaiVietService baiVietService = new BaiVietServiceImpl();
+                System.out.printf("Lựa chọn bài viết cần xem(1-" + baiVietYeuThiches.size() + "),0 để thoát: ");
+                int viTriBL = Ip.nextInt();
+                if(viTriBL < 1){
+                    continue;
+                }
+                Ip.nextLine();
+                BaiViet baiViet = baiVietYeuThiches.get(viTriBL - 1).getMaBaiViet();
+                baiVietService.hienThiThongTin(baiViet);
+                System.out.printf("1.Hiển thị danh sách người yêu thích\n2.Hiển thị thêm bình luận\n0.Thoát: ");
+                int choose3 = Ip.nextInt();
+                if (choose3 == 2) {
+                    baiVietService.xemToanBoBinhLuan(baiViet);
+                }
+                if (choose3 == 1) {
+                    baiVietService.xemDanhSachNguoiThich(baiViet);
+                }
+                if (choose3 == 0) {
+                    break;
+                }
+            }
         }while (true) ;
+    }
+
+    public KhachHang timKiemKhachHang(KhachHang khachHang , String tenKhachHang){
+        int pageSize = khachHangService.soTaiKhoanTimThay(tenKhachHang) ;
+        int pageIndex = 1 ;
+        do{
+            System.out.println("-------------------------------Danh sách tài khoản tìm thấy------------------------------------");
+            Response response = khachHangService.timKiemTaiKhoan(tenKhachHang , pageIndex) ;
+            List<KhachHang> khachHangs = (List<KhachHang>) response.getNoiDung();
+            if(khachHangs.size() == 0) {
+                System.out.println("-------------------------------Không tìm thấy khách hàng nào---------------------------------");
+                break ;
+            }
+            for(KhachHang x : khachHangs){
+                System.out.println("---Tên khách hàng: " + x.getTenKhachHang() + "\nĐịa chỉ email: " + x.getDiaChiEmail() + "\nNgày sinh: " + x.getNgaySinh());
+            }
+            System.out.print("1.Hiển thị thêm khách hàng\n2.Theo dõi khách hàng\n3.Truy cập trang cá nhân khách hàng\n0.Thoát khỏi tìm kiếm khách hàng: ");
+            int choose = Ip.nextInt() ;
+            if(choose == 1){
+                pageIndex = (int) khachHangService.xuLiTrang(pageSize).getNoiDung();
+                if(pageIndex < 1){
+                    break;
+                }
+            }
+            if(choose == 2){
+                if(khachHang == null){
+                    System.out.println("Vui lòng đăng nhập");
+                    Ip.nextLine() ;
+                    khachHang = dangNhap() ;
+                    if(khachHang == null) return null ;
+                }
+                System.out.println("Lựa chọn người dùng(1-" + khachHangs.size()+ ")");
+                int index = 0 ;
+                for(KhachHang x : khachHangs){
+                    System.out.println("       Khách hàng số: " + ++index);
+                    System.out.println( "           " + x.getTenKhachHang());
+                }
+                System.out.printf("Mời bạn nhập lựa chọn , nhập 0 để thoát:  ");
+                int viTriKhachHang = Ip.nextInt();
+                if(viTriKhachHang < 1) break;
+                Response responseTheoDoi = khachHangService.theoDoi(khachHang   , khachHangs.get(viTriKhachHang-1)) ;
+                System.out.println(responseTheoDoi.getNoiDung());
+            }
+            if(choose == 3){
+                BaiVietService baiVietService = new BaiVietServiceImpl() ;
+                BaiVietDAO baiVietDAO = new BaiVietImpl() ;
+                System.out.printf("Lựa chọn người dùng(1-" + khachHangs.size()+ ")");
+                int index = 0 ;
+                for(KhachHang x : khachHangs){
+                    System.out.println("       Khách hàng số: " + ++index);
+                    System.out.println( "           " + x.getTenKhachHang());
+                }
+                System.out.printf("Mời bạn nhập lựa chọn , nhập 0 để thoát:  ");
+                int viTriKhachHang = Ip.nextInt();
+                if(viTriKhachHang < 1) break;
+                int blogIndex = 1 ;
+                int maxPage = (int) baiVietService.soTrang(khachHangs.get(viTriKhachHang-1)).getNoiDung();
+                do {
+                    Response responseBlog = baiVietService.layRaDanhSachBaiVietTheoNguoiDung(khachHangs.get(viTriKhachHang - 1), blogIndex);
+                    List<BaiViet> baiViets = (List<BaiViet>) responseBlog.getNoiDung();
+                    baiVietService.xuLiBaiViet(baiViets,khachHang);
+                    blogIndex = (int) baiVietService.xuLiTrang(maxPage).getNoiDung();
+                    if(blogIndex < 1)
+                    {
+                        break ;
+                    }
+                }while (true) ;
+            }
+            if(choose == 0){
+                break;
+            }
+        }while (true) ;
+        return  khachHang ;
     }
 }

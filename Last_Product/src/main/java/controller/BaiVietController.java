@@ -178,6 +178,45 @@ public class BaiVietController {
             }
         } while (true) ;
     }
+
+    public void xemBaiVietDaXoa(KhachHang khachHang){
+        Scanner Ip = new Scanner(System.in) ;
+        int maxBaiViets = (int)baiVietService.soTrangDaXoa(khachHang).getNoiDung() ;
+        int pageIndex = 1 ;
+        do{
+            System.out.println("-------------------------Danh sách bài viết bạn đã xoá-------------------------");
+            Response response = baiVietService.xemBaiVietDaXoa(khachHang,pageIndex) ;
+            List<BaiViet> baiViets = (List<BaiViet>) response.getNoiDung();
+            int thuTuBaiViet  = 0 ;
+            for (BaiViet x : baiViets) {
+                System.out.println("---Bài viết số " + ++thuTuBaiViet );
+                baiVietService.hienThiThongTin(x);
+            }
+            System.out.print("1.Hiển thị thêm bài viết\n2.Khôi phục bài viết\n0.Thoát khỏi xem bài viết đã xoá: ");
+            int choose = Ip.nextInt() ;
+            if(choose == 1) {
+                pageIndex = (int) baiVietService.xuLiTrang(maxBaiViets).getNoiDung();
+                if(pageIndex < 1)
+                    break;
+            }
+            if(choose == 2){
+                int viTriBaiViet = viTriBaiViet(baiViets) ;
+                if(viTriBaiViet <= 0){
+                    break ;
+                }
+                Response khoiPhucBaiVietResponse = baiVietService.khoiPhucBaiVietDaXoa(baiViets.get(viTriBaiViet-1));
+                if(khoiPhucBaiVietResponse.getMaLoi().equals("200")){
+                    System.out.println("--------------------------Khôi phục bài viết thành công----------------------");
+                }
+            }
+
+            if(choose == 0){
+                break;
+            }
+        }while(true)  ;
+
+
+    }
     private int viTriBaiViet(List<BaiViet> baiViets){
         Scanner Ip = new Scanner(System.in)  ;
         System.out.println("Lựa chọn bài viết(1-" + baiViets.size() + "), bỏ trống để huỷ");

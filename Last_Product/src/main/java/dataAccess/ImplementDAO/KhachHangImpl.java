@@ -126,13 +126,15 @@ public class KhachHangImpl implements KhachHangDAO{
     }
 
     @Override
-    public List<KhachHang> findByName(String t) {
+    public List<KhachHang> findByName(String t, int index) {
         List<KhachHang> khachHangs = new ArrayList<>() ;
         try {
             Connection connection = JDBC.getConnection() ;
-            String sql = "select * from KhachHang where tenKhachHang like CONCAT('%',?,'%') " ;
+            String sql = "select * from KhachHang where tenKhachHang like CONCAT('%',?,'%') limit ? , ?" ;
             PreparedStatement preparedStatement = connection.prepareStatement(sql) ;
             preparedStatement.setString(1, t);
+            preparedStatement.setInt(2,(index-1) * PAGE_SIZE);
+            preparedStatement.setInt(3,PAGE_SIZE);
             ResultSet resultSet = preparedStatement.executeQuery() ;
             while (resultSet.next()){
                 KhachHang one = KhachHang.builder()
@@ -151,5 +153,25 @@ public class KhachHangImpl implements KhachHangDAO{
             throw new RuntimeException(e);
         }
         return khachHangs ;
+    }
+
+    @Override
+    public int soKhachHangTimThay(String tenKhachHang) {
+        int ans =0 ;
+        try {
+            Connection connection = JDBC.getConnection() ;
+            String sql = "SELECT  count(*)'soKhachHang' " +
+                    "FROM KhachHang " +
+                    "WHERE tenKhachHang like CONCAT('%' , ? , '%')" ;
+            PreparedStatement preparedStatement = connection.prepareStatement(sql) ;
+            preparedStatement.setString(1,tenKhachHang);
+            ResultSet resultSet= preparedStatement.executeQuery() ;
+            while (resultSet.next()){
+                ans = resultSet.getInt("soKhachHang") ;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return ans ;
     }
 }

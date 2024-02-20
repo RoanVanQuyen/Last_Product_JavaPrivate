@@ -105,7 +105,7 @@ public class BaiVietYeuThichServiceImpl implements BaiVietYeuThichService {
             if(baiVietYeuThichDAO.insert(baiVietYeuThich)){
                 response = Response.builder()
                         .maLoi("200")
-                        .noiDung("Thành công")
+                        .noiDung("------------------------------Thành công-------------------------")
                         .trangThai("Thành công")
                         .build();
             };

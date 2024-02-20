@@ -72,24 +72,11 @@ public class BinhLuanServiceImpl implements BinhLuanService {
 
     @Override
     public Response layRaDanhSachBinhLuan(String maBaiViet , int index) {
-        Response response = baiVietService.timKiemBaiVietTheoId(maBaiViet) ;
-        if(response.getMaLoi().equals("404")){
-            response = Response.builder()
-                    .maLoi("404")
-                    .noiDung("Không tìm thấy bài viết theo yêu cầu")
-                    .trangThai("Thất bại")
-                    .build();
-        }
-        else{
-            if(response.getMaLoi().equals("200")){
-                List<BinhLuan> binhLuans = binhLuanDAO.findAllByIdBlog(maBaiViet , index) ;
-                response = Response.builder()
-                        .maLoi("200")
-                        .noiDung(binhLuans)
-                        .trangThai("Thành công")
-                        .build() ;
-            }
-        }
+        List<BinhLuan> binhLuans = new ArrayList<>() ;
+        binhLuans = binhLuanDAO.findAllByIdBlog(maBaiViet , index) ;
+        Response response  = Response.builder()
+                .noiDung(binhLuans)
+                .build() ;
         return response;
     }
 

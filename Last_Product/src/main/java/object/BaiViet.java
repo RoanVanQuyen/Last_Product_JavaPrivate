@@ -17,6 +17,7 @@ public class BaiViet {
     private String noiDung ;
     @Builder.Default
     private LocalDateTime ngayDang = LocalDateTime.now();
-    private KhachHang tenDangNhap  ;
-
+    private KhachHang tenDangNhap ;
+    @Builder.Default
+    private boolean tonTai = true;
 }

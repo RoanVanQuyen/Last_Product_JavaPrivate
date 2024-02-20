@@ -10,6 +10,7 @@ public interface BaiVietService {
     final  static int PAGESIZE = 3;
     public Response themBaiViet(BaiViet baiViet)  ;
     public Response xoaBaiViet(BaiViet baiViet) ;
+    public Response xoaBaiVietForNQT(BaiViet baiViet) ;
     public Response suaBaiViet(BaiViet baiViet) ;
     public Response timKiemBaiViet(String name) ;
     public Response timKiemBaiVietTheoId(String id) ;
@@ -18,8 +19,12 @@ public interface BaiVietService {
     public void hienThiThongTin(BaiViet baiViet) ;
     public int soTrang() ;
     public Response soTrang(KhachHang khachHang) ;
-    public Response xuLiTrang(int maxPage) ;
+    public Response soTrangDaXoa(KhachHang khachHang) ;     public Response xuLiTrang(int maxPage) ;
     public void xuLiBaiViet(List<BaiViet> baiVietList , KhachHang khachHang) ;
     public void xemDanhSachNguoiThich(BaiViet baiViet) ;
     public void xemToanBoBinhLuan(BaiViet baiViet) ;
+
+    public Response xemBaiVietDaXoa(KhachHang khachHang , int index) ;
+
+    public Response khoiPhucBaiVietDaXoa(BaiViet baiViet) ;
 }

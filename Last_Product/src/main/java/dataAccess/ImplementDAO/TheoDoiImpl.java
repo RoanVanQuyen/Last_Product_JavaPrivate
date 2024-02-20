@@ -8,7 +8,11 @@ import object.Response;
 import object.TheoDoi;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class TheoDoiImpl implements TheoDoiDAO {
@@ -46,7 +50,7 @@ public class TheoDoiImpl implements TheoDoiDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1 , theoDoi.getTenDangNhap().getTenDangNhap());
             preparedStatement.setString(2,theoDoi.getTenNguoiTheoDoi().getTenDangNhap());
-            preparedStatement.executeQuery() ;
+            preparedStatement.executeUpdate() ;
             connection.close();
         } catch (SQLException e) {
             return  false ;
@@ -93,10 +97,37 @@ public class TheoDoiImpl implements TheoDoiDAO {
         if(theoDoi.isPresent()){
             response = Response.builder()
                     .maLoi("200")
-                    .noiDung("Theo doi ton tai")
+                    .noiDung(theoDoi.get())
                     .trangThai("OK")
                     .build();
         }
         return response;
+    }
+
+    @Override
+    public List<TheoDoi> layDanhSachNguoiTheoDoi(KhachHang khachHang) {
+        List<TheoDoi> theoDois = new ArrayList<>() ;
+        try {
+            Connection connection = JDBC.getConnection() ;
+            String sql = "SELECT * \n" +
+                    "FROM TheoDoi \n" +
+                    "where tenDangNhap = ? " ;
+             PreparedStatement preparedStatement = connection.prepareStatement(sql);
+             preparedStatement.setString(1, khachHang.getTenDangNhap());
+             ResultSet resultSet = preparedStatement.executeQuery();
+             while(resultSet.next()){
+                 KhachHangDAO khachHangDAO = new KhachHangImpl() ;
+                 TheoDoi theoDoi = TheoDoi.builder()
+                         .tenNguoiTheoDoi(khachHangDAO.findById(resultSet.getString("tenNguoiTheoDoi")))
+                         .tenDangNhap(khachHang)
+                         .ngayTheoDoi(resultSet.getTimestamp("ngayTheoDoi").toLocalDateTime())
+                         .build();
+                 theoDois.add(theoDoi) ;
+             }
+             connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return theoDois ;
     }
 }

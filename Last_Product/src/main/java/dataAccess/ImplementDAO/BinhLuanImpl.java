@@ -20,11 +20,11 @@ public class BinhLuanImpl implements BinhLuanDAO {
             Connection connection =  JDBC.getConnection() ;
             KhachHangDAO khachHangDAO = new KhachHangImpl() ;
             BaiVietDAO baiVietDAO = new BaiVietImpl() ;
-            String sql  = "select * from BinhLuan where maBaiViet = ? Limit ? OFFSET ?" ;
+            String sql  = "select * from BinhLuan where maBaiViet = ? limit ? , ?" ;
             PreparedStatement preparedStatement = connection.prepareStatement(sql) ;
             preparedStatement.setString(1,maBaiViet);
-            preparedStatement.setInt(2,PAGE_SIZE);
-            preparedStatement.setInt(3,(index-1) * PAGE_SIZE);
+            preparedStatement.setInt(2,(index-1) * PAGE_SIZE);
+            preparedStatement.setInt(3,PAGE_SIZE);
             ResultSet resultSet= preparedStatement.executeQuery() ;
             while (resultSet.next()){
                 BaiViet baiViet = baiVietDAO.findById(resultSet.getString("maBaiViet")) ;
